@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Introduction: Chat With Your Own Files - RAG Your Docs Handbook</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <div class="brand">RAG Your<br>Docs Handbook</div>
+  <nav><ul>
+<li><a href="00-introduction.html" class="active">Introduction: Chat With Your Own Files</a></li>
+<li><a href="01-chunking.html" class="">Chunking: Cutting Documents Into Useful Pieces</a></li>
+<li><a href="02-embeddings.html" class="">Embeddings: Turning Meaning Into Numbers</a></li>
+<li><a href="03-vector-stores.html" class="">Vector Stores: Where Your Numbers Live</a></li>
+<li><a href="04-local-vs-api.html" class="">Local Models vs API Models</a></li>
+<li><a href="05-tool-comparison.html" class="">Tool Comparison: Choosing Your Parts</a></li>
+<li><a href="06-pipeline-walkthrough.html" class="">Pipeline Walkthrough: Ask Your Manual a Question</a></li>
+<li><a href="07-citations.html" class="">Citation Sanity Checks: Trusting What Your Assistant Says</a></li>
+<li class="nav-section">Project</li><li><a href="../README.md">README</a></li><li><a href="https://ollama.com" rel="noopener">Ollama (external)</a></li>
+  </ul></nav>
+  <p class="foot">Local-first. No secrets.<br>
+  &copy; 2026 Asdale Dynamics, LLC</p>
+</aside>
+<main>
+<h1>Introduction: Chat With Your Own Files</h1>
+<p>This manual teaches you how to build a small, private assistant that answers questions about <strong>your own documents</strong> — using a technique called <strong>RAG</strong> (Retrieval-Augmented Generation). Everything here runs locally on your computer. No API keys, no cloud accounts, no secrets.</p>
+<h2>Who this is for</h2>
+<ul>
+<li>You have a folder of PDFs, notes, or markdown files and wish you could just <em>ask them questions</em>.</li>
+<li>You have heard the words "embeddings", "chunking", and "vector store" and want them explained <strong>like a friend would</strong>: plainly, step by step, never condescending.</li>
+<li>You prefer privacy: your files never leave your machine.</li>
+</ul>
+<h2>The one-paragraph version</h2>
+<p>A retrieval assistant works in two phases:</p>
+<ol>
+<li><strong>Index (offline, once per document set).</strong> Split your files into small pieces ("chunks"), convert each chunk into a list of numbers ("embedding"), and store those numbers in a searchable index ("vector store").</li>
+<li><strong>Answer (online, every question).</strong> Convert the user's question into an embedding too, find the chunks whose numbers are most similar to the question's numbers, and hand those chunks — plus the question — to a local language model (Ollama or llama.cpp) to write the answer.</li>
+</ol>
+<p>That's it. Everything else in this manual is detail about doing those two phases <em>well</em>.</p>
+<h2>What you will learn</h2>
+<table><thead><tr><th>Chapter</th><th>Topic</th></tr></thead>
+<tbody><tr><td>01</td><td>How chunking works and why size and overlap matter</td></tr>
+<tr><td>02</td><td>Embeddings explained without the math degree</td></tr>
+<tr><td>03</td><td>Vector stores: storing and searching your numbers</td></tr>
+<tr><td>04</td><td>Local models (Ollama/llama.cpp) vs API models</td></tr>
+<tr><td>05</td><td>Tool comparisons: what real options exist</td></tr>
+<tr><td>06</td><td>A full pipeline walkthrough, start to finish</td></tr>
+<tr><td>07</td><td>Citation sanity checks: trusting what the assistant says</td></tr>
+</tbody>
+</table>
+<h2>What you will build</h2>
+<p>Alongside this manual there is an <code>examples/</code> folder containing a tiny but complete reference implementation:</p>
+<ul>
+<li><code>examples/01-index.py</code> — chunker + embedder + index store</li>
+<li><code>examples/02-ask.py</code> — question answering with citations</li>
+<li><code>examples/03-tests.py</code> — sanity tests you can run without any model installed</li>
+</ul>
+<p>The examples use a <strong>mock embedder and mock model by default</strong>, so every step runs on any laptop with plain Python. Swap in Ollama when you are ready and the same code keeps working.</p>
+<h2>Prerequisites</h2>
+<ul>
+<li>Python 3.9+</li>
+<li>That's it. (Ollama is optional; see Chapter 04.)</li>
+</ul>
+<p>Let's go.</p>
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vector Stores: Where Your Numbers Live - RAG Your Docs Handbook</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <div class="brand">RAG Your<br>Docs Handbook</div>
+  <nav><ul>
+<li><a href="00-introduction.html" class="">Introduction: Chat With Your Own Files</a></li>
+<li><a href="01-chunking.html" class="">Chunking: Cutting Documents Into Useful Pieces</a></li>
+<li><a href="02-embeddings.html" class="">Embeddings: Turning Meaning Into Numbers</a></li>
+<li><a href="03-vector-stores.html" class="active">Vector Stores: Where Your Numbers Live</a></li>
+<li><a href="04-local-vs-api.html" class="">Local Models vs API Models</a></li>
+<li><a href="05-tool-comparison.html" class="">Tool Comparison: Choosing Your Parts</a></li>
+<li><a href="06-pipeline-walkthrough.html" class="">Pipeline Walkthrough: Ask Your Manual a Question</a></li>
+<li><a href="07-citations.html" class="">Citation Sanity Checks: Trusting What Your Assistant Says</a></li>
+<li class="nav-section">Project</li><li><a href="../README.md">README</a></li><li><a href="https://ollama.com" rel="noopener">Ollama (external)</a></li>
+  </ul></nav>
+  <p class="foot">Local-first. No secrets.<br>
+  &copy; 2026 Asdale Dynamics, LLC</p>
+</aside>
+<main>
+<h1>Vector Stores: Where Your Numbers Live</h1>
+<p>A <strong>vector store</strong> (also: vector index, vector database) keeps every chunk's embedding and finds the nearest ones to a query quickly.</p>
+<h2>Do you need a "real" vector database?</h2>
+<p>Almost certainly not, at personal scale. Here is the honest ladder:</p>
+<table><thead><tr><th>Scale</th><th>Right tool</th></tr></thead>
+<tbody><tr><td>Up to ~50k chunks</td><td>A JSON/SQLite file + brute-force cosine search</td></tr>
+<tr><td>50k–5M chunks</td><td>Hot-vector index (e.g. a numpy matrix + <code>argmax</code>-style scan)</td></tr>
+<tr><td>Multi-million, multi-user, always-on</td><td>FAISS, Qdrant, Chroma, pgvector</td></tr>
+</tbody>
+</table>
+<p>Brute-force cosine search over 10,000 vectors of 384 dimensions takes <strong>milliseconds</strong> on a laptop. The fancy databases exist for scale and servers, not for accuracy. Starting with a plain file is not "toy" — it is <em>sane</em>.</p>
+<h2>What the store must record per chunk</h2>
+<pre><code class="lang-text">
+{
+  &quot;id&quot;: &quot;doc-017&quot;,
+  &quot;text&quot;: &quot;the actual chunk content ...&quot;,
+  &quot;source&quot;: &quot;docs/01-chunking.md&quot;,
+  &quot;chunk_index&quot;: 3,
+  &quot;embedding&quot;: [0.13, -0.72, ...]
+}
+</code></pre>
+<p>Text, source path, and chunk index are as important as the vector itself — the source path is what citations are made of (Chapter 07).</p>
+<h2>Our store</h2>
+<p><code>examples/01-index.py</code> writes a single JSON file with all of the above. <code>examples/02-ask.py</code> loads it, brute-force scores the query against every entry, and returns the top k. Two files, no daemon, no install. Copy the index file to another machine and it works there: the store <em>is</em> your data, with no hidden state.</p>
+<p>Graduating later to FAISS or Chroma is a one-function change because the chunking, metadata, and citation layers never change.</p>
+<h2>Pitfalls</h2>
+<ul>
+<li><strong>Float formats.</strong> Store full precision or accept slightly different scores after a round-trip.</li>
+<li><strong>Parallel files.</strong> Keep a "manifest" sidecar: the model name, dimension, and chunk settings used. Future-you will thank past-you when an index won't load and you're guessing why.</li>
+<li><strong>Deleting documents.</strong> Rebuild the index instead of surgically removing entries; at personal scale a rebuild is cheaper than the bug you'd write.</li>
+</ul>
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tool Comparison: Choosing Your Parts - RAG Your Docs Handbook</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <div class="brand">RAG Your<br>Docs Handbook</div>
+  <nav><ul>
+<li><a href="00-introduction.html" class="">Introduction: Chat With Your Own Files</a></li>
+<li><a href="01-chunking.html" class="">Chunking: Cutting Documents Into Useful Pieces</a></li>
+<li><a href="02-embeddings.html" class="">Embeddings: Turning Meaning Into Numbers</a></li>
+<li><a href="03-vector-stores.html" class="">Vector Stores: Where Your Numbers Live</a></li>
+<li><a href="04-local-vs-api.html" class="">Local Models vs API Models</a></li>
+<li><a href="05-tool-comparison.html" class="active">Tool Comparison: Choosing Your Parts</a></li>
+<li><a href="06-pipeline-walkthrough.html" class="">Pipeline Walkthrough: Ask Your Manual a Question</a></li>
+<li><a href="07-citations.html" class="">Citation Sanity Checks: Trusting What Your Assistant Says</a></li>
+<li class="nav-section">Project</li><li><a href="../README.md">README</a></li><li><a href="https://ollama.com" rel="noopener">Ollama (external)</a></li>
+  </ul></nav>
+  <p class="foot">Local-first. No secrets.<br>
+  &copy; 2026 Asdale Dynamics, LLC</p>
+</aside>
+<main>
+<h1>Tool Comparison: Choosing Your Parts</h1>
+<p>This chapter compares the real building-block options honestly, including the parts of the ecosystem every tutorial name-drops.</p>
+<h2>Embedding layer</h2>
+<table><thead><tr><th>Tool</th><th>Runs fully local?</th><th>Install weight</th><th>Verdict</th></tr></thead>
+<tbody><tr><td>Ollama (<code>ollama embed</code>)</td><td>Yes</td><td>One binary, ~1 GB model</td><td>Easiest local start</td></tr>
+<tr><td>sentence-transformers</td><td>Yes</td><td>pip + ~90 MB model per model</td><td>Best batch-indexing API</td></tr>
+<tr><td>llama.cpp (<code>--embedding</code>)</td><td>Yes</td><td>Compiled binary</td><td>One tool for both jobs</td></tr>
+<tr><td>OpenAI embeddings API</td><td>No</td><td>trivial</td><td>Best raw quality; your text leaves home</td></tr>
+</tbody>
+</table>
+<p><strong>Pick:</strong> Ollama's <code>nomic-embed-text</code> for simplicity, sentence-transformers' MiniLM for indexing speed.</p>
+<h2>Generator layer</h2>
+<table><thead><tr><th>Tool</th><th>Runs fully local?</th><th>Notes</th></tr></thead>
+<tbody><tr><td>Ollama</td><td>Yes</td><td><code>ollama serve</code>, HTTP on localhost:11434</td></tr>
+<tr><td>llama.cpp server</td><td>Yes</td><td>OpenAI-compatible server mode, single binary</td></tr>
+<tr><td>LM Studio</td><td>Yes</td><td>GUI, friendly for non-terminal people</td></tr>
+<tr><td>Cloud chat APIs</td><td>No</td><td>Top quality; requires keys and trust</td></tr>
+</tbody>
+</table>
+<p><strong>Pick:</strong> Ollama for beginners, llama.cpp for control, cloud only when a task demands it (and the documents are not sensitive).</p>
+<h2>Vector layer</h2>
+<table><thead><tr><th>Tool</th><th>Local-only?</th><th>When it earns its complexity</th></tr></thead>
+<tbody><tr><td>JSON/SQLite file (ours)</td><td>Yes</td><td>&lt; 50k chunks — always start here</td></tr>
+<tr><td>numpy brute force</td><td>Yes</td><td>50k–1M chunks, fast and exact</td></tr>
+<tr><td>FAISS</td><td>Yes</td><td>Millions of chunks, GPU if you have it</td></tr>
+<tr><td>Chroma</td><td>Yes</td><td>Want filtering + persistence without writing it</td></tr>
+<tr><td>Qdrant / pgvector</td><td>Yes</td><td>Server-grade, multiple users, always running</td></tr>
+</tbody>
+</table>
+<p><strong>Pick:</strong> the boring file. Graduate only when a real number (chunk count, latency) forces you to.</p>
+<h2>Full frameworks (do everything)</h2>
+<table><thead><tr><th>Framework</th><th>Character</th></tr></thead>
+<tbody><tr><td>LangChain / LlamaIndex</td><td>Huge, batteries-included, many abstraction layers</td></tr>
+<tr><td>txtai</td><td>Leaner all-in-one (embeddings + search + workflow)</td></tr>
+<tr><td>Roll your own (ours)</td><td>~300 readable lines; every bug is <em>your</em> bug, and fixable</td></tr>
+</tbody>
+</table>
+<p>For learning, the roll-your-own path is unmatched: after this manual you will understand what LangChain actually does, and can use it (or skip it) from a position of knowledge.</p>
+<h2>A decision table you can trust</h2>
+<ol>
+<li>Files sensitive or you are offline? → local embedder + local generator.</li>
+<li>Under 50k chunks? → JSON or SQLite store, brute force.</li>
+<li>Want one command install? → Ollama for both models.</li>
+<li>Genuinely need top-tier reasoning? → that one task via API; everything else stays local.</li>
+</ol>
+<p>That four-line policy is 95% of the practical decision-making in this field.</p>
+</main>
+</div>
+</body>
+</html>

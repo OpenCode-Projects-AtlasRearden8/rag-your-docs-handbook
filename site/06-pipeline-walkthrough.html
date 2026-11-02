@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pipeline Walkthrough: Ask Your Manual a Question - RAG Your Docs Handbook</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <div class="brand">RAG Your<br>Docs Handbook</div>
+  <nav><ul>
+<li><a href="00-introduction.html" class="">Introduction: Chat With Your Own Files</a></li>
+<li><a href="01-chunking.html" class="">Chunking: Cutting Documents Into Useful Pieces</a></li>
+<li><a href="02-embeddings.html" class="">Embeddings: Turning Meaning Into Numbers</a></li>
+<li><a href="03-vector-stores.html" class="">Vector Stores: Where Your Numbers Live</a></li>
+<li><a href="04-local-vs-api.html" class="">Local Models vs API Models</a></li>
+<li><a href="05-tool-comparison.html" class="">Tool Comparison: Choosing Your Parts</a></li>
+<li><a href="06-pipeline-walkthrough.html" class="active">Pipeline Walkthrough: Ask Your Manual a Question</a></li>
+<li><a href="07-citations.html" class="">Citation Sanity Checks: Trusting What Your Assistant Says</a></li>
+<li class="nav-section">Project</li><li><a href="../README.md">README</a></li><li><a href="https://ollama.com" rel="noopener">Ollama (external)</a></li>
+  </ul></nav>
+  <p class="foot">Local-first. No secrets.<br>
+  &copy; 2026 Asdale Dynamics, LLC</p>
+</aside>
+<main>
+<h1>Pipeline Walkthrough: Ask Your Manual a Question</h1>
+<p>Let's build the whole thing end to end against <strong>this manual itself</strong>.</p>
+<h2>Step 0 — Layout</h2>
+<pre><code class="lang-text">
+rag-your-docs-handbook/
+  docs/      &lt;- the manual, plain markdown
+  examples/  &lt;- the pipeline: index, ask, tests
+</code></pre>
+<h2>Step 1 — Index (run once)</h2>
+<pre><code class="lang-bash">
+python3 examples/01-index.py docs --index /tmp/opencode/handbook-index.json
+</code></pre>
+<p>What happens inside:</p>
+<ol>
+<li>Every <code>.md</code> file in <code>docs/</code> is read.</li>
+<li>Each file is split into ~700-character chunks at sentence/paragraph boundaries with 100 characters of overlap (Chapter 01).</li>
+<li>Each chunk is tagged with <code>source</code> and <code>chunk_index</code> metadata.</li>
+<li>Each chunk is embedded (mock by default, Chapter 02).</li>
+<li>Everything is written to one JSON store (Chapter 03).</li>
+</ol>
+<h2>Step 2 — Ask</h2>
+<pre><code class="lang-bash">
+python3 examples/02-ask.py /tmp/opencode/handbook-index.json &quot;How much overlap should chunks have?&quot;
+</code></pre>
+<p>What happens inside:</p>
+<ol>
+<li>The question is embedded with the <em>same</em> embedder that built the index.</li>
+<li>Cosine similarity ranks every chunk; the top 4 are selected.</li>
+<li>A prompt is assembled: instructions + the four chunks (each labeled with its source path) + the question.</li>
+<li>The generator answers <strong>only from those chunks</strong> and ends with citations like <code>[source: docs/01-chunking.md]</code>.</li>
+</ol>
+<p>If you have Ollama running, add <code>--provider ollama --model llama3.2:3b</code> and the same chunks go into a real local model prompt. Without Ollama, the mock generator still demonstrates retrieval and citation mechanics.</p>
+<h2>Step 3 — Sanity-check the answer (always)</h2>
+<p>Before trusting any answer, run the citation check from Chapter 07:</p>
+<pre><code class="lang-bash">
+python3 examples/03-tests.py --index /tmp/opencode/handbook-index.json --run-suite
+</code></pre>
+<p>...or read <code>docs/07-citations.md</code> and check by hand: every claim in the answer should trace to a chunk that actually contains it.</p>
+<h2>What "working" looks like</h2>
+<ul>
+<li>Asking about chunk overlap retrieves Chapter 01, not Chapter 05.</li>
+<li>Asking "what vector store should I use at 10,000 chunks?" retrieves the table in Chapter 03.</li>
+<li>Citations point to real files that exist in <code>docs/</code>.</li>
+<li>Nothing ever leaves your machine.</li>
+</ul>
+<h2>Timing expectations</h2>
+<p>On a modest laptop, indexing this 8-chapter manual takes well under a second with the mock embedder (a real MiniLM or nomic embedder adds a few seconds for model load, then stays ~1k tokens/sec). Asking a question is milliseconds of retrieval plus whatever your generator takes.</p>
+<h2>Extending it</h2>
+<ul>
+<li><strong>PDF support</strong>: extract the text, then feed the same chunker — the rest of the pipeline does not change.</li>
+<li><strong>Watch mode</strong>: re-run the indexer when files change, so the index stays fresh.</li>
+<li><strong>Better ranking</strong>: try a keyword pre-filter (BM25) before cosine ranking; hybrid search is the single biggest quality jump most systems need.</li>
+</ul>
+</main>
+</div>
+</body>
+</html>

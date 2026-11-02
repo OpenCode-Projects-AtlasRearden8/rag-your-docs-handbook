@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Local Models vs API Models - RAG Your Docs Handbook</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <div class="brand">RAG Your<br>Docs Handbook</div>
+  <nav><ul>
+<li><a href="00-introduction.html" class="">Introduction: Chat With Your Own Files</a></li>
+<li><a href="01-chunking.html" class="">Chunking: Cutting Documents Into Useful Pieces</a></li>
+<li><a href="02-embeddings.html" class="">Embeddings: Turning Meaning Into Numbers</a></li>
+<li><a href="03-vector-stores.html" class="">Vector Stores: Where Your Numbers Live</a></li>
+<li><a href="04-local-vs-api.html" class="active">Local Models vs API Models</a></li>
+<li><a href="05-tool-comparison.html" class="">Tool Comparison: Choosing Your Parts</a></li>
+<li><a href="06-pipeline-walkthrough.html" class="">Pipeline Walkthrough: Ask Your Manual a Question</a></li>
+<li><a href="07-citations.html" class="">Citation Sanity Checks: Trusting What Your Assistant Says</a></li>
+<li class="nav-section">Project</li><li><a href="../README.md">README</a></li><li><a href="https://ollama.com" rel="noopener">Ollama (external)</a></li>
+  </ul></nav>
+  <p class="foot">Local-first. No secrets.<br>
+  &copy; 2026 Asdale Dynamics, LLC</p>
+</aside>
+<main>
+<h1>Local Models vs API Models</h1>
+<p>Every RAG pipeline has two models: an <strong>embedder</strong> (Chapter 02) and a <strong>generator</strong> (the thing that writes the final answer). Each can run locally or behind a paid cloud API. This chapter helps you choose — with the bias you already expect: <strong>local first</strong>.</p>
+<h2>The comparison</h2>
+<table><thead><tr><th></th><th>Local (Ollama / llama.cpp)</th><th>Cloud API</th></tr></thead>
+<tbody><tr><td>---</td><td>---</td><td>---</td></tr>
+<tr><td>Privacy</td><td>Files never leave your machine</td><td>Text is sent to a third party</td></tr>
+<tr><td>Cost</td><td>Free after download</td><td>Per-token, forever</td></tr>
+<tr><td>Offline</td><td>Works on a plane, in a hospital basement</td><td>Needs internet</td></tr>
+<tr><td>Quality ceiling</td><td>Good; below the largest cloud models</td><td>The largest models available</td></tr>
+<tr><td>Speed</td><td>Depends on your hardware</td><td>Fast, consistent</td></tr>
+<tr><td>Setup</td><td>One binary + one pull</td><td>Accounts, keys, billing, rate limits</td></tr>
+<tr><td>Secrets</td><td>None required</td><td>API keys to protect and rotate</td></tr>
+</tbody>
+</table>
+<h2>Concrete numbers that matter</h2>
+<ul>
+<li>A 3–4B-parameter model runs well on a normal laptop (8 GB RAM) and is genuinely good at <em>summarizing retrieved chunks</em> — which is 90% of what a RAG generator does.</li>
+<li>The heavier lifting is actually the <em>retrieval</em>; a mediocre model fed the right four chunks beats a brilliant model fed the wrong ones.</li>
+<li>Cloud APIs win when tasks need deep reasoning over sparse evidence. For a personal document assistant, that is the exception, not the daily job.</li>
+</ul>
+<h2>The values verdict</h2>
+<p>If your documents are health, financial, or client-related — the exact things you want to ask about — sending them to a cloud API to be answered is exactly backwards. Local-first is not nostalgia; it is the privacy-correct default. Start local. Use an API only if a specific task genuinely demands the top-tier model, and then only with documents you'd be comfortable emailing to a stranger.</p>
+<h2>Getting Ollama</h2>
+<pre><code class="lang-bash">
+# install from https://ollama.com, then:
+ollama pull nomic-embed-text   # embedder
+ollama pull llama3.2:3b        # generator (small, fast, decent)
+ollama run llama3.2:3b &quot;Say hi.&quot;
+</code></pre>
+<p>llama.cpp is the lower-level alternative: one compiled executable, run a <code>.gguf</code> model file directly, same privacy story.</p>
+<h2>What our examples do</h2>
+<p><code>examples/02-ask.py</code> answers with a <strong>mock generator</strong> by default (it extracts and echoes the best-matching sentences), so the whole pipeline demos on a machine with no Ollama installed. When Ollama is present, pass <code>--provider ollama</code> and the <em>same retrieval and citation code</em> feeds your prompt to the local model instead. Retrieval quality is provider-independent — which is exactly why we test it separately in Chapter 07.</p>
+</main>
+</div>
+</body>
+</html>

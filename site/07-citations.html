@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Citation Sanity Checks: Trusting What Your Assistant Says - RAG Your Docs Handbook</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <div class="brand">RAG Your<br>Docs Handbook</div>
+  <nav><ul>
+<li><a href="00-introduction.html" class="">Introduction: Chat With Your Own Files</a></li>
+<li><a href="01-chunking.html" class="">Chunking: Cutting Documents Into Useful Pieces</a></li>
+<li><a href="02-embeddings.html" class="">Embeddings: Turning Meaning Into Numbers</a></li>
+<li><a href="03-vector-stores.html" class="">Vector Stores: Where Your Numbers Live</a></li>
+<li><a href="04-local-vs-api.html" class="">Local Models vs API Models</a></li>
+<li><a href="05-tool-comparison.html" class="">Tool Comparison: Choosing Your Parts</a></li>
+<li><a href="06-pipeline-walkthrough.html" class="">Pipeline Walkthrough: Ask Your Manual a Question</a></li>
+<li><a href="07-citations.html" class="active">Citation Sanity Checks: Trusting What Your Assistant Says</a></li>
+<li class="nav-section">Project</li><li><a href="../README.md">README</a></li><li><a href="https://ollama.com" rel="noopener">Ollama (external)</a></li>
+  </ul></nav>
+  <p class="foot">Local-first. No secrets.<br>
+  &copy; 2026 Asdale Dynamics, LLC</p>
+</aside>
+<main>
+<h1>Citation Sanity Checks: Trusting What Your Assistant Says</h1>
+<p>Here is the uncomfortable truth: a language model will write confident, polished nonsense if you let it. RAG's superpower is that every answer has a paper trail — but only if you <em>check</em> it. This chapter is the safety net, and it is the most important one in the manual.</p>
+<h2>The rule</h2>
+<p><strong>No chunk, no claim.</strong> An answer is only trustworthy when each factual claim in it can be traced to a retrieved chunk that supports it. Your pipeline's job is to make that check <em>cheap</em>: every chunk carries its source path, and the answer ends with citations.</p>
+<h2>The checklist that catches most hallucinations</h2>
+<ol>
+<li><strong>Do the cited files exist?</strong> If the citation names <code>docs/09-alchemy.md</code> and your <code>docs/</code> stops at 07 — hallucination confirmed. This check is pure scripting and our test suite does it automatically.</li>
+<li><strong>Do the cited chunks contain the claim?</strong> If the answer says "use 100 characters of overlap" the cited chunk better mention it. (The mock generator quotes chunks verbatim, so this always passes with our demo — that is by design, so failures mean your index or question is off, not the model lying.)</li>
+<li><strong>Is the retrieval on-topic?</strong> Read the top chunks before the answer. If you asked about <em>cost</em> and chunks are about <em>privacy</em>, no model can save the answer. Fix the embedder or the chunking, not the prompt.</li>
+<li><strong>Does the answer add claims the chunks lack?</strong> Real (non-mock) models will. Anything in the answer that isn't in a chunk is unsupported — treat it as a hypothesis, not a fact.</li>
+<li><strong>Cross-question probe.</strong> Ask a question the corpus <em>cannot</em> answer ("what is the capital of Kazakhstan?"). A well-behaved pipeline's chunks will be irrelevant, and a good generator will say "I don't know from these documents". If it fabricates anyway, you have found your hallucination rate.</li>
+</ol>
+<h2>Automated checks in the examples</h2>
+<p><code>examples/03-tests.py —run-suite</code> verifies, with no model required:</p>
+<ul>
+<li>the index file is well-formed JSON with required fields;</li>
+<li>top-k retrieval returns non-empty, source-valid results for sample queries;</li>
+<li><strong>every citation in a demo answer points to an existing file</strong>;</li>
+<li>the impossible-question probe returns no confident nonsense (the mock generator fails closed by saying what it found, and the test asserts the retrieval-relevance threshold).</li>
+</ul>
+<h2>Human checks for the everyday case</h2>
+<p>When you use the assistant for real decisions — a work deadline, a patient- education handout, a budget number — do one extra pass: open every cited file and read the paragraph the chunk came from. Twenty seconds. It is the difference between "the assistant told me" and "I checked, and it's in my notes".</p>
+<h2>A note for the healthcare reader</h2>
+<p>Nurses (hi, Dylan) know exactly why this chapter exists: if the source is a CE module PDF, checking the citation is the difference between education and error. This manual and its examples are <strong>AI education only, never medical advice</strong> — and that same stance is the one to carry into every retrieval system you build: show sources, verify sources, refuse to answer when sources are missing.</p>
+</main>
+</div>
+</body>
+</html>

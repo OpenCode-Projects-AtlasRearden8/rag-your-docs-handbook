@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chunking: Cutting Documents Into Useful Pieces - RAG Your Docs Handbook</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <div class="brand">RAG Your<br>Docs Handbook</div>
+  <nav><ul>
+<li><a href="00-introduction.html" class="">Introduction: Chat With Your Own Files</a></li>
+<li><a href="01-chunking.html" class="active">Chunking: Cutting Documents Into Useful Pieces</a></li>
+<li><a href="02-embeddings.html" class="">Embeddings: Turning Meaning Into Numbers</a></li>
+<li><a href="03-vector-stores.html" class="">Vector Stores: Where Your Numbers Live</a></li>
+<li><a href="04-local-vs-api.html" class="">Local Models vs API Models</a></li>
+<li><a href="05-tool-comparison.html" class="">Tool Comparison: Choosing Your Parts</a></li>
+<li><a href="06-pipeline-walkthrough.html" class="">Pipeline Walkthrough: Ask Your Manual a Question</a></li>
+<li><a href="07-citations.html" class="">Citation Sanity Checks: Trusting What Your Assistant Says</a></li>
+<li class="nav-section">Project</li><li><a href="../README.md">README</a></li><li><a href="https://ollama.com" rel="noopener">Ollama (external)</a></li>
+  </ul></nav>
+  <p class="foot">Local-first. No secrets.<br>
+  &copy; 2026 Asdale Dynamics, LLC</p>
+</aside>
+<main>
+<h1>Chunking: Cutting Documents Into Useful Pieces</h1>
+<p>Before anything can be embedded or searched, a document must be split into <strong>chunks</strong> — small pieces of text that each carry one coherent idea.</p>
+<h2>Why chunk at all?</h2>
+<p>Embedding models have a practical size limit (a few hundred to a few thousand <em>tokens</em>), and search quality collapses when a chunk tries to cover too much: a chunk containing ten topics matches ten different questions <em>badly</em>, because its meaning is muddy. Small, focused chunks match <em>well</em>.</p>
+<h2>The three settings that matter</h2>
+<ol>
+<li><strong>Chunk size.</strong> How many characters (or tokens) per chunk. Rules of thumb:</li>
+</ol>
+<ul>
+<li>200–400 characters: fast, precise, may lose context</li>
+<li>800–1200 characters: the sweet spot for most prose</li>
+<li>2000+ characters: only for long, uniform documents</li>
+</ul>
+<ol>
+<li><strong>Overlap.</strong> How much consecutive chunks share, usually 10–20% of size. Overlap prevents a sentence that straddles a boundary from being cut in half and lost. Without overlap, "the answer was in the last chunk's first line" chunks fail to retrieve.</li>
+<li><strong>Splitting strategy.</strong> Where to cut:</li>
+</ol>
+<ul>
+<li><strong>Naive</strong>: fixed windows of N characters. Fast, but cuts mid-sentence.</li>
+<li><strong>Recursive</strong>: try to split on paragraphs, then sentences, then words — only falling back to raw characters if a piece is still too big. This is what most production systems (and LangChain) do, and it is what our example uses.</li>
+</ul>
+<h2>A mental model</h2>
+<p>Think of a book being turned into index cards. Each card should hold <strong>one paragraph of one point with its context</strong>. The "context" part is why overlap exists: if a paragraph begins "Here's why that fails…", the card is useless unless the card before it (or an overlap sentence) explains what "that" is.</p>
+<h2>Worked example</h2>
+<p>Given text of 10,000 characters with <code>size=800, overlap=100</code>:</p>
+<ul>
+<li>Chunk 1: characters 0–799</li>
+<li>Chunk 2: characters 700–1499 (100 chars overlap)</li>
+<li>Chunk 3: characters 1400–2199</li>
+<li>… and so on, stepping 700 each time.</li>
+</ul>
+<p>The recursive splitter changes <em>where</em> the cuts happen (sentence and paragraph boundaries) but not <em>how much</em> is covered.</p>
+<h2>Pitfalls</h2>
+<ul>
+<li><strong>Headers mean a fresh topic</strong> — always start a new chunk at a heading.</li>
+<li><strong>Tables and code</strong> should not be split mid-structure; treat them as atomic chunks if smaller than the limit.</li>
+<li><strong>Too-small chunks</strong> retrieve precise-looking sentences with no surrounding meaning; <strong>too-large chunks</strong> drown the key sentence in noise.</li>
+<li><strong>No metadata</strong> — always attach the source filename and chunk position to every chunk <em>now</em>; you'll need it for citations in Chapter 07.</li>
+</ul>
+<h2>Try it</h2>
+<p>The chunker in <code>examples/01-index.py</code> implements recursive splitting with overlap and metadata. Run it on this manual itself:</p>
+<pre><code class="lang-bash">
+python3 examples/01-index.py docs --index /tmp/opencode/demo-index.json
+</code></pre>
+<p>Then inspect <code>/tmp/opencode/demo-index.json</code> — you'll see exactly where the cuts landed and why.</p>
+</main>
+</div>
+</body>
+</html>
