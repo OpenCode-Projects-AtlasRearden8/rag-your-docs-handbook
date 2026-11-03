@@ -1,8 +1,13 @@
-# Local artifacts / junk
-__pycache__/
-*.pyc
-.DS_Store
-*.swp
 
 # Index files are data, not source (rebuild any time)
+# Local artifacts / junk
 *.index.json
+*.pyc
+*.swp
+.DS_Store
+.env
+.env.*
+.venv/
+__pycache__/
+dist/*.tmp
+node_modules/
